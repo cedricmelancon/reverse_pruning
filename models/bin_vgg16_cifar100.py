@@ -80,3 +80,6 @@ class VGG_cifar100(VGG16):
         #     184: {'lr': 1e-4},
         #     220: {'lr': 1e-5}
         # }
+
+        def train_step(self, data):
+            
