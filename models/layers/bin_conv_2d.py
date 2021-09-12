@@ -1,9 +1,8 @@
 import tensorflow as tf
-from .bin_active import BinActive
+import numpy as np
 
 
 def forward(x):
-    mean = tf.experimental.numpy.mean(tf.abs(x))
     input = tf.sign(x)
 
     @tf.custom_gradient
@@ -13,7 +12,7 @@ def forward(x):
         grad_input[input.le(-1)] = 0
         return grad_input
 
-    return input, mean
+    return input, grad
 
 
 class BinConv2d(tf.keras.layers.Layer):
@@ -31,7 +30,7 @@ class BinConv2d(tf.keras.layers.Layer):
 
     def call(self, x):
         x = self.bn(x)
-        x, mean = forward(x)
+        x, grad = forward(x)
         if self.dropout_ratio != 0:
             x = self.dropout(x)
 
@@ -39,3 +38,7 @@ class BinConv2d(tf.keras.layers.Layer):
 
         # x = self.relu(x)
         return x
+
+    def get_weights(self):
+        #print(self.conv.weights)
+        return tf.convert_to_tensor(self.conv.weights[0])

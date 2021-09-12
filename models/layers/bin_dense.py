@@ -1,5 +1,5 @@
 import tensorflow as tf
-
+import numpy as np
 
 def forward(x):
     mean = tf.experimental.numpy.mean(tf.abs(x))
@@ -36,3 +36,7 @@ class BinDense(tf.keras.layers.Layer):
         x = self.dense(x)
 
         return x
+
+    def get_weights(self):
+        #print(self.dense.weights)
+        return tf.convert_to_tensor(self.dense.weights[0])

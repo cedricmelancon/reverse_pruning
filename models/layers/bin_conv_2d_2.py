@@ -1,5 +1,27 @@
 import tensorflow as tf
-from .bin_active2 import BinActive2
+import numpy as np
+
+
+def forward(x):
+    num_bits = 2  # Bit-precision
+    v0 = 1
+    v1 = 2
+    v2 = -0.5
+
+    y = 2. ** num_bits - 1.
+    x = tf.divide(tf.add(x, v0), v1)
+    x = tf.round(tf.multiply(x, y))
+    x = tf.divide(x, y)
+    x = tf.add(x, v2)
+    x = tf.multiply(x, v1)
+    input = x
+
+    @tf.custom_gradient
+    def grad(grad_output):
+        grad_input = grad_output.clone()
+        return grad_input
+
+    return input, grad
 
 
 class BinConv2d2(tf.keras.layers.Layer):
@@ -15,9 +37,9 @@ class BinConv2d2(tf.keras.layers.Layer):
 
         # self.relu = nn.ReLU(inplace=True)
 
-    def forward(self, x):
+    def call(self, x):
         x = self.bn(x)
-        x, mean = BinActive2(x)
+        x, mean = forward(x)
         if self.dropout_ratio != 0:
             x = self.dropout(x)
 
@@ -25,3 +47,7 @@ class BinConv2d2(tf.keras.layers.Layer):
 
         # x = self.relu(x)
         return x
+
+    def get_weights(self):
+        #print(self.conv.weights)
+        return tf.convert_to_tensor(self.conv.weights[0])

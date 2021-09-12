@@ -1,7 +1,6 @@
 import tensorflow as tf
 from models.bin_vgg16_cifar100 import VGG_cifar100
 import utils.preprocess as preprocess
-from utils.bin_op import BinOp
 
 import numpy
 import random
@@ -36,8 +35,9 @@ reduce_lr = tf.keras.callbacks.LearningRateScheduler(lr_scheduler)
 
 sgd = tf.keras.optimizers.SGD(lr=learning_rate, momentum=0.9, nesterov=True)
 model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy', 'top_k_categorical_accuracy'])
-
-bin_op = BinOp(model)
+test = tf.reshape(x_train[0], (1, 32, 32, 3))
+model(test)
+model.initialize()
 
 model.fit(x=x_train, y=y_train, batch_size=batch_size, epochs=max_epochs, validation_data=(x_test, y_test), callbacks=[reduce_lr])
 model.summary()
