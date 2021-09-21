@@ -38,5 +38,9 @@ class BinDense(tf.keras.layers.Layer):
         return x
 
     def get_weights(self):
-        #print(self.dense.weights)
-        return tf.convert_to_tensor(self.dense.weights[0])
+        weights = self.dense.weights[0]
+        weights = tf.transpose(weights, (1, 0))
+        return weights
+
+    def set_gradients(self, grad):
+        self.dense.grad = grad

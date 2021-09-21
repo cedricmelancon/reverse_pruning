@@ -87,16 +87,16 @@ class VGG_cifar100(tf.keras.Sequential):
     def initialize(self):
         self.bin_op.initialize()
 
+    @tf.function
     def train_step(self, data):
-        self.bin_op.binarization()
-
-        if len(data) == 3:
-            x, y, sample_weight = data
-        else:
-            sample_weight = None
-            x, y = data
-
         with tf.GradientTape() as tape:
+            self.bin_op.binarization()
+            if len(data) == 3:
+                x, y, sample_weight = data
+            else:
+                sample_weight = None
+                x, y = data
+
             y_pred = self(x, training=True)  # Forward pass
             # Compute the loss value.
             # The loss function is configured in `compile()`.
@@ -113,14 +113,14 @@ class VGG_cifar100(tf.keras.Sequential):
 
             self.optimizer.apply_gradients(zip(gradients, trainable_vars))
 
-        # Update the metrics.
-        # Metrics are configured in `compile()`.
-        self.compiled_metrics.update_state(y, y_pred, sample_weight=sample_weight)
+            # Update the metrics.
+            # Metrics are configured in `compile()`.
+            self.compiled_metrics.update_state(y, y_pred, sample_weight=sample_weight)
 
-        # restore weights
-        self.bin_op.restore()
-        self.bin_op.updateBinaryGradWeight()
+            # restore weights
+            self.bin_op.restore()
+            self.bin_op.updateBinaryGradWeight()
 
-        # Return a dict mapping metric names to current value.
-        # Note that it will include the loss (tracked in self.metrics).
-        return {m.name: m.result() for m in self.metrics}
+            # Return a dict mapping metric names to current value.
+            # Note that it will include the loss (tracked in self.metrics).
+            return {m.name: m.result() for m in self.metrics}

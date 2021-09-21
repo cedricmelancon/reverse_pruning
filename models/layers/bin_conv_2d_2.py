@@ -49,5 +49,9 @@ class BinConv2d2(tf.keras.layers.Layer):
         return x
 
     def get_weights(self):
-        #print(self.conv.weights)
-        return tf.convert_to_tensor(self.conv.weights[0])
+        weights = self.conv.weights[0]
+        weights = tf.transpose(weights, (3, 2, 1, 0))
+        return weights
+
+    def set_gradients(self, grad):
+        self.conv.grad = grad
